@@ -5,7 +5,7 @@ from django.http import HttpResponse, FileResponse
 from django.conf import settings
 import os
 from .models import TeamMember, FashionImage, MediaFile
-from .serializers import TeamMemberSerializer
+from .serializers import TeamMemberSerializer, MediaFileSerializer
 
 class TeamMemberViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = TeamMember.objects.all()
@@ -55,19 +55,23 @@ def serve_image(request, image_name):
     """Serve images directly from the backend (legacy endpoint)"""
     return serve_media(request, 'images', image_name)
 
-@action(detail=False, methods=['get'])
-def media_list(self, request):
-    """Get list of all media files"""
-    media_files = MediaFile.objects.all()
-    media_data = []
+class MediaFileViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = MediaFile.objects.all()
+    serializer_class = MediaFileSerializer
     
-    for media in media_files:
-        request = self.context.get('request') if hasattr(self, 'context') else request
-        media_data.append({
-            'name': media.name,
-            'type': media.media_type,
-            'url': request.build_absolute_uri(media.file.url) if request else media.file.url,
-            'description': media.description
-        })
-    
-    return Response(media_data)
+    @action(detail=False, methods=['get'])
+    def media_list(self, request):
+        """Get list of all media files"""
+        media_files = MediaFile.objects.all()
+        serializer = self.get_serializer(media_files, many=True, context={'request': request})
+        
+        media_data = []
+        for media in serializer.data:
+            media_data.append({
+                'name': media['name'],
+                'type': media['media_type'],
+                'url': media['file_url'],
+                'description': media['description']
+            })
+        
+        return Response(media_data)

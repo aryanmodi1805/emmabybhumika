@@ -4,6 +4,7 @@ from . import views
 
 router = DefaultRouter()
 router.register(r'team-members', views.TeamMemberViewSet)
+router.register(r'media-files', views.MediaFileViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),

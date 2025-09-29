@@ -1,0 +1,1 @@
+web: python manage.py migrate --settings=fashion_backend.production && python manage.py collectstatic --noinput --settings=fashion_backend.production && gunicorn fashion_backend.wsgi --settings=fashion_backend.production

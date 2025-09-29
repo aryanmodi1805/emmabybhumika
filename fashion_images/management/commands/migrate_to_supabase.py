@@ -70,7 +70,12 @@ class Command(BaseCommand):
                 )
                 continue
             
-            local_path = os.path.join(settings.MEDIA_ROOT, image.image_file.name)
+            # Fix the path - extract filename and create correct path
+            file_path = image.image_file.name
+            filename = os.path.basename(file_path)  # Get just the filename (e.g., "1.jpg")
+            file_path = f'images/{filename}'  # Create correct path (e.g., "images/1.jpg")
+            
+            local_path = os.path.join(settings.MEDIA_ROOT, file_path)
             
             if not os.path.exists(local_path):
                 error_count += 1
@@ -129,7 +134,14 @@ class Command(BaseCommand):
                 )
                 continue
             
-            local_path = os.path.join(settings.MEDIA_ROOT, media.file.name)
+            # Fix the path - remove duplicate 'media/' prefix
+            file_path = media.file.name
+            if file_path.startswith('media/media/'):
+                file_path = file_path.replace('media/media/', '')
+            elif file_path.startswith('media/'):
+                file_path = file_path.replace('media/', '')
+            
+            local_path = os.path.join(settings.MEDIA_ROOT, file_path)
             
             if not os.path.exists(local_path):
                 error_count += 1
